@@ -1,0 +1,127 @@
+package lexer
+
+import (
+	"compiler/token"
+	"testing"
+)
+
+func TestNextToken_BasicToken(t *testing.T) {
+	// Arrange
+	input := `=+(){},;`
+
+	tests := []struct {
+		expectedType    token.TokenType
+		expectedLiteral string
+	}{
+		{token.ASSIGN, "="},
+		{token.PLUS, "+"},
+		{token.LPAREN, "("},
+		{token.RPAREN, ")"},
+		{token.LBRACE, "{"},
+		{token.RBRACE, "}"},
+		{token.COMMA, ","},
+		{token.SEMICOLON, ";"},
+		{token.EOF, ""},
+	}
+
+	l := New(input)
+
+	for i, tt := range tests {
+		token := l.NextToken()
+		if token.Type != tt.expectedType {
+			t.Fatalf("test %d error, got %s, expect %s", i, token.Type,
+				tt.expectedType)
+		}
+		if token.Literal != tt.expectedLiteral {
+			t.Fatalf("test %d error, got %s, expect %s", i, token.Literal,
+				tt.expectedLiteral)
+		}
+	}
+}
+
+func TestNextToken_Identifier(t *testing.T) {
+	// Arrange
+	input := `let abc = 512
+        let add = fn(x, y) {
+            x + y
+        }
+    `
+
+	tests := []struct {
+		expectedType    token.TokenType
+		expectedLiteral string
+	}{
+		{token.LET, "let"},
+		{token.INDENT, "abc"},
+		{token.ASSIGN, "="},
+		{token.INT, "512"},
+		{token.LET, "let"},
+		{token.INDENT, "add"},
+		{token.ASSIGN, "="},
+		{token.FUNCTION, "fn"},
+		{token.LPAREN, "("},
+		{token.INDENT, "x"},
+		{token.COMMA, ","},
+		{token.INDENT, "y"},
+		{token.RPAREN, ")"},
+		{token.LBRACE, "{"},
+		{token.INDENT, "x"},
+		{token.PLUS, "+"},
+		{token.INDENT, "y"},
+		{token.RBRACE, "}"},
+	}
+
+	l := New(input)
+
+	for i, tt := range tests {
+		token := l.NextToken()
+		if token.Type != tt.expectedType {
+			t.Fatalf("test %d error, got %s, expect %s", i, token.Type,
+				tt.expectedType)
+		}
+		if token.Literal != tt.expectedLiteral {
+			t.Fatalf("test %d error, got %s, expect %s", i, token.Literal,
+				tt.expectedLiteral)
+		}
+	}
+}
+
+func TestNextToken_Peek(t *testing.T) {
+	// Arrange
+	input := `a == b
+    a != b
+    a <= b
+    a>=b`
+
+	tests := []struct {
+		expectedType    token.TokenType
+		expectedLiteral string
+	}{
+		{token.INDENT, "a"},
+		{token.EQ, "=="},
+		{token.INDENT, "b"},
+		{token.INDENT, "a"},
+		{token.NE, "!="},
+		{token.INDENT, "b"},
+		{token.INDENT, "a"},
+		{token.LE, "<="},
+		{token.INDENT, "b"},
+		{token.INDENT, "a"},
+		{token.GE, ">="},
+		{token.INDENT, "b"},
+	}
+
+	l := New(input)
+
+	for i, tt := range tests {
+		token := l.NextToken()
+		if token.Type != tt.expectedType {
+			t.Fatalf("test %d error, got %s, expect %s", i, token.Type,
+				tt.expectedType)
+		}
+		if token.Literal != tt.expectedLiteral {
+			t.Fatalf("test %d error, got %s, expect %s", i, token.Literal,
+				tt.expectedLiteral)
+		}
+	}
+}
