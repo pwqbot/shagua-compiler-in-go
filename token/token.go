@@ -11,7 +11,7 @@ const (
 	ILLEGAL TokenType = "ILLEGAL"
 	EOF     TokenType = "EOF"
 
-	INDENT TokenType = "IDENT"
+	IDENT  TokenType = "IDENT"
 	INT    TokenType = "INT"
 	STRING TokenType = "STRING"
 
@@ -61,5 +61,5 @@ func LoopUpKeywords(key string) TokenType {
 	if tok, ok := keywords[key]; ok {
 		return tok
 	}
-	return INDENT
+	return IDENT
 }

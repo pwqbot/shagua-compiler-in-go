@@ -52,22 +52,22 @@ func TestNextToken_Identifier(t *testing.T) {
 		expectedLiteral string
 	}{
 		{token.LET, "let"},
-		{token.INDENT, "abc"},
+		{token.IDENT, "abc"},
 		{token.ASSIGN, "="},
 		{token.INT, "512"},
 		{token.LET, "let"},
-		{token.INDENT, "add"},
+		{token.IDENT, "add"},
 		{token.ASSIGN, "="},
 		{token.FUNCTION, "fn"},
 		{token.LPAREN, "("},
-		{token.INDENT, "x"},
+		{token.IDENT, "x"},
 		{token.COMMA, ","},
-		{token.INDENT, "y"},
+		{token.IDENT, "y"},
 		{token.RPAREN, ")"},
 		{token.LBRACE, "{"},
-		{token.INDENT, "x"},
+		{token.IDENT, "x"},
 		{token.PLUS, "+"},
-		{token.INDENT, "y"},
+		{token.IDENT, "y"},
 		{token.RBRACE, "}"},
 	}
 
@@ -97,18 +97,18 @@ func TestNextToken_Peek(t *testing.T) {
 		expectedType    token.TokenType
 		expectedLiteral string
 	}{
-		{token.INDENT, "a"},
+		{token.IDENT, "a"},
 		{token.EQ, "=="},
-		{token.INDENT, "b"},
-		{token.INDENT, "a"},
+		{token.IDENT, "b"},
+		{token.IDENT, "a"},
 		{token.NE, "!="},
-		{token.INDENT, "b"},
-		{token.INDENT, "a"},
+		{token.IDENT, "b"},
+		{token.IDENT, "a"},
 		{token.LE, "<="},
-		{token.INDENT, "b"},
-		{token.INDENT, "a"},
+		{token.IDENT, "b"},
+		{token.IDENT, "a"},
 		{token.GE, ">="},
-		{token.INDENT, "b"},
+		{token.IDENT, "b"},
 	}
 
 	l := New(input)
