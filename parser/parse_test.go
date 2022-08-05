@@ -12,15 +12,15 @@ import (
 func TestLetStatements(t *testing.T) {
 	input := `
     let x = 5;
-    let y = 10; 
-    ley foobar = 8234141;
+    let y = 10;
+    let foobar = 8234141;
     `
 
 	l := lexer.New(input)
 	p := New(l)
 	program := p.ParseProgram()
 
-    require.Equal(t, len(program.Statements), 3)
+	require.Equal(t, 3, len(program.Statements))
 
 	tests := []struct {
 		expectedIdentifier string
@@ -37,8 +37,30 @@ func TestLetStatements(t *testing.T) {
 }
 
 func testLetStatement(t *testing.T, s ast.Statement, name string) {
-	assert.Equal(t, s.TokenLiteral(), "let")
+	assert.Equal(t, "let", s.TokenLiteral())
+
 	letStmt, ok := s.(*ast.LetStatement)
 	assert.True(t, ok)
-    assert.Equal(t, letStmt.TokenLiteral(), name)
+	assert.Equal(t, name, letStmt.Name.TokenLiteral())
+}
+
+func TestParseIntegerExpression(t *testing.T) {
+	table := [][2]string{
+		{
+			"5;", "5",
+		},
+		{
+			"-1;", "-1",
+		},
+		{
+			"0;", "0",
+		},
+	}
+
+	for _, data := range table {
+		l := lexer.New(data[0])
+		p := New(l)
+		program := p.ParseProgram()
+		assert.Equal(t, 1, len(program.Statements))
+	}
 }

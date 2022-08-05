@@ -20,20 +20,24 @@ type Parser struct {
 	curToken  token.Token
 	peekToken token.Token
 
-	prefixParseFns map[token.TokenType]prefixParseFn
-	infixParseFns  map[token.TokenType]infixParseFn
+	stmtParser     *StmtParser
+	exprParser     *ExprParser
 }
 
 func New(l *lexer.Lexer) *Parser {
 	p := &Parser{
-		l:              l,
-		errors:         []error{},
-		curToken:       token.Token{},
-		peekToken:      token.Token{},
-		prefixParseFns: map[token.TokenType]prefixParseFn{},
-		infixParseFns:  map[token.TokenType]infixParseFn{},
+		l:          l,
+		errors:     []error{},
+		curToken:   token.Token{},
+		peekToken:  token.Token{},
+		stmtParser: &StmtParser{},
+		exprParser: &ExprParser{},
 	}
-	p.registerPrefix(token.IDENT, p.parseIndentifier)
+	p.stmtParser = &StmtParser{
+		Parser: p,
+	}
+	p.exprParser = NewExprParser(p)
+
 	return p
 }
 
@@ -56,89 +60,17 @@ func (p *Parser) ParseProgram() *ast.Program {
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
 	case token.LET:
-		return p.parsetLetStatement()
+		return p.stmtParser.parsetLetStatement()
 	case token.IF:
-		return p.parseIfStatement()
+		return p.stmtParser.parseIfStatement()
 	case token.RETURN:
-		return p.parseReturnStatement()
+		return p.stmtParser.parseReturnStatement()
 	case token.FUNCTION:
-		return p.parseFunctionStatement()
+		return p.stmtParser.parseFunctionStatement()
 	default:
-		return p.parseExpressionStatement()
+		return p.stmtParser.parseExpressionStatement(LOWEST)
 	}
 }
-
-func (p *Parser) parseExpressionStatement() ast.Statement {
-	return nil
-}
-
-func (p *Parser) parsetLetStatement() ast.Statement {
-	// let <identifier> = <expression>
-	stmt := &ast.LetStatement{
-		Token: p.curToken,
-		Name:  nil,
-		Value: nil,
-	}
-
-	if !p.expectPeek(token.IDENT) {
-		return nil
-	}
-
-	stmt.Name = &ast.Identifier{
-		Token: p.curToken,
-		Value: p.curToken.Literal,
-	}
-
-	// do noting with assign
-	if !p.expectPeek(token.ASSIGN) {
-		return nil
-	}
-
-	// TODO(dingwang): parse expression
-	for !p.curTokenIs(token.SEMICOLON) {
-		p.nextToken()
-	}
-
-	return nil
-}
-
-func (p *Parser) parseReturnStatement() ast.Statement {
-	// return <expression>
-	stmt := &ast.ReturnStatement{
-		Token: p.curToken,
-		Value: nil,
-	}
-	p.nextToken()
-	// TODO(dingwang): parse expression
-	for !p.curTokenIs(token.SEMICOLON) {
-		p.nextToken()
-	}
-	return stmt
-}
-
-func (p *Parser) parseIfStatement() ast.Statement {
-	return nil
-}
-
-func (p *Parser) parseFunctionStatement() ast.Statement {
-	return nil
-}
-
-func (p *Parser) parseExpression(precedence int) ast.Expression {
-	prefix := p.prefixParseFns[p.curToken.Type]
-	if prefix == nil {
-		return nil
-	}
-	leftExp := prefix()
-	return leftExp
-}
-
-func (p *Parser) parseIndentifier() ast.Expression {
-	return &ast.Identifier{
-		Token: p.curToken,
-		Value: p.curToken.Literal,
-	}
-} 
 
 // some helper junctions
 func (p *Parser) nextToken() {
@@ -162,14 +94,6 @@ func (p *Parser) expectPeek(t token.TokenType) bool {
 		p.addPeekError(t)
 		return false
 	}
-}
-
-func (p *Parser) registerPrefix(t token.TokenType, f prefixParseFn) {
-	p.prefixParseFns[t] = f
-}
-
-func (p *Parser) registerInfix(t token.TokenType, f infixParseFn) {
-	p.infixParseFns[t] = f
 }
 
 // error handling
