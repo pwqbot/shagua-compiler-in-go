@@ -32,11 +32,11 @@ var precedencs = map[token.TokenType]int{
 	token.GT:        LESSGREATER,
 	token.GE:        LESSGREATER,
 	token.LPAREN:    LPAREN,
-	token.RPAREN:    LPAREN,
+	token.RPAREN:    LOWEST,
 	token.LBRACE:    LPAREN,
-	token.RBRACE:    LPAREN,
+	token.RBRACE:    LOWEST,
 	token.COMMA:     LPAREN,
-	token.SEMICOLON: LPAREN,
+	token.SEMICOLON: LOWEST,
 }
 
 func findPrecedence(t token.TokenType) int {

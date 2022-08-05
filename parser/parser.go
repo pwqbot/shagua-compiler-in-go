@@ -20,8 +20,8 @@ type Parser struct {
 	curToken  token.Token
 	peekToken token.Token
 
-	stmtParser     *StmtParser
-	exprParser     *ExprParser
+	stmtParser *StmtParser
+	exprParser *ExprParser
 }
 
 func New(l *lexer.Lexer) *Parser {
@@ -37,6 +37,8 @@ func New(l *lexer.Lexer) *Parser {
 		Parser: p,
 	}
 	p.exprParser = NewExprParser(p)
+	p.nextToken()
+	p.nextToken()
 
 	return p
 }

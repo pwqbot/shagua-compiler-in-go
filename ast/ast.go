@@ -12,6 +12,7 @@ type Statement interface {
 
 type Expression interface {
 	Node
+	String() string
 	expressionNode()
 }
 

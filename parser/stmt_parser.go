@@ -12,19 +12,23 @@ type StmtParser struct {
 func (p *StmtParser) parseExpressionStatement(precedence int) ast.Statement {
 	stmt := &ast.ExpressionStatement{
 		Token:      p.curToken,
-		Expression: p.parseExpression(LOWEST),
+		Expression: p.exprParser.parseExpression(LOWEST),
 	}
 
+	// println(p.curToken.Literal)
+	// println(stmt.Expression.TokenLiteral())
 	if p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
 
+	// println(p.curToken.Literal)
+
+	// print(stmt.Expression.TokenLiteral())
 	return stmt
 }
 
 func (p *StmtParser) parsetLetStatement() ast.Statement {
 	// let <identifier> = <expression>
-	print("Parse let ")
 	stmt := &ast.LetStatement{
 		Token: p.curToken,
 		Name:  nil,
@@ -48,11 +52,11 @@ func (p *StmtParser) parsetLetStatement() ast.Statement {
 	}
 
 	// TODO(dingwang): parse expression
+	stmt.Value = p.exprParser.parseExpression(LOWEST)
+
 	for !p.curTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
-	// println(p.curToken.Literal)
-	println()
 
 	return stmt
 }

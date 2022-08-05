@@ -20,6 +20,10 @@ func (i *Identifier) TokenLiteral() string {
 	return i.Token.Literal
 }
 
+func (i *Identifier) String() string {
+	return i.TokenLiteral()
+}
+
 type IntegerLiteral struct {
 	Token token.Token
 	Value int64
@@ -29,8 +33,10 @@ func (i *IntegerLiteral) TokenLiteral() string {
 	return i.Token.Literal
 }
 
-func (i *IntegerLiteral) expressionNode() {
+func (i *IntegerLiteral) expressionNode() {}
 
+func (i *IntegerLiteral) String() string {
+	return i.TokenLiteral()
 }
 
 type PrefixExpression struct {
@@ -46,6 +52,10 @@ func (p *PrefixExpression) expressionNode() {
 
 }
 
+func (ie *PrefixExpression) String() string {
+	return "(" + ie.TokenLiteral() + ie.Right.String() + ")"
+}
+
 type InfixExpression struct {
 	Token token.Token
 	Left  Expression
@@ -58,4 +68,8 @@ func (ie *InfixExpression) TokenLiteral() string {
 
 func (ie *InfixExpression) expressionNode() {
 
+}
+
+func (ie *InfixExpression) String() string {
+	return "(" + ie.Left.String() + " "+ ie.TokenLiteral() + " " +  ie.Right.String() + ")"
 }
