@@ -1,4 +1,5 @@
 # shagua-compiler-in-go
 
  - [x] lexer
- - [ ] parser
+ - [x] parser
+ - [ ] evaluation
