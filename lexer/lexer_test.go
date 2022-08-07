@@ -91,9 +91,11 @@ func TestNextToken_Peek(t *testing.T) {
 	input := `a == b
     a != b
     a <= b
-    a>=b`
+    a>=b
+	a++
+	b--`
 
-	tests := []struct {
+	table := []struct {
 		expectedType    token.TokenType
 		expectedLiteral string
 	}{
@@ -109,11 +111,15 @@ func TestNextToken_Peek(t *testing.T) {
 		{token.IDENT, "a"},
 		{token.GE, ">="},
 		{token.IDENT, "b"},
+		{token.IDENT, "a"},
+		{token.PLUSPLUS, "++"},
+		{token.IDENT, "b"},
+		{token.MINUSMINUS, "--"},
 	}
 
 	l := New(input)
 
-	for i, tt := range tests {
+	for i, tt := range table {
 		token := l.NextToken()
 		if token.Type != tt.expectedType {
 			t.Fatalf("test %d error, got %s, expect %s", i, token.Type,

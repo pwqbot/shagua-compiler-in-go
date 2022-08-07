@@ -47,9 +47,25 @@ func (l *Lexer) NextToken() token.Token {
 	case '?':
 		tok = newToken(token.WHAT, l.ch)
 	case '+':
-		tok = newToken(token.PLUS, l.ch)
+		if l.peekRune(1) == "+" {
+			l.readRune()
+			tok = token.Token{
+				Type:    token.PLUSPLUS,
+				Literal: "++",
+			}
+		} else {
+			tok = newToken(token.PLUS, l.ch)
+		}
 	case '-':
-		tok = newToken(token.MINUS, l.ch)
+		if l.peekRune(1) == "-" {
+			l.readRune()
+			tok = token.Token{
+				Type:    token.MINUSMINUS,
+				Literal: "--",
+			}
+		} else {
+			tok = newToken(token.MINUS, l.ch)
+		}
 	case '>':
 		if l.peekRune(1) == "=" {
 			l.readRune()
