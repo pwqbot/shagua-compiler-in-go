@@ -30,10 +30,10 @@ func TestParseIntegerExpression(t *testing.T) {
 		require.Equal(t, 1, len(program.Statements))
 
 		expr, ok := (program.Statements[0]).(*ast.ExpressionStatement)
-		assert.True(t, ok)
+		require.True(t, ok)
 
 		intLiteral, ok := expr.Expression.(*ast.IntegerLiteral)
-		assert.True(t, ok)
+		require.True(t, ok)
 
 		assert.Equal(t, int64(data.value), intLiteral.Value)
 	}
@@ -61,15 +61,44 @@ func TestParsePrefixExpression(t *testing.T) {
 		require.Equal(t, 1, len(program.Statements))
 
 		expr, ok := (program.Statements[0]).(*ast.ExpressionStatement)
-		assert.True(t, ok)
+		require.True(t, ok)
 
 		prefixExpression, ok := expr.Expression.(*ast.PrefixExpression)
-		assert.True(t, ok)
+		require.True(t, ok)
 
 		intLiteral, ok := prefixExpression.Right.(*ast.IntegerLiteral)
-		assert.True(t, ok)
+		require.True(t, ok)
 		assert.Equal(t, int64(data.value), intLiteral.Value)
 		assert.Equal(t, data.op, prefixExpression.TokenLiteral())
+	}
+}
+
+func TestParseSuffixExpression(t *testing.T) {
+	table := []struct {
+		input  string
+		expect string
+	}{
+		{
+			"5++;", "(5++)",
+		},
+		{
+			"1--;", "(1--)",
+		},
+	}
+
+	for _, data := range table {
+		// println(data)
+		l := lexer.New(data.input)
+		p := New(l)
+		program := p.ParseProgram()
+		require.Equal(t, 1, len(program.Statements))
+
+		expr, ok := (program.Statements[0]).(*ast.ExpressionStatement)
+		require.True(t, ok)
+
+		suffixExpression, ok := expr.Expression.(*ast.SuffixExpression)
+		require.True(t, ok)
+		assert.Equal(t, data.expect, suffixExpression.String())
 	}
 }
 
@@ -137,6 +166,12 @@ func TestPrecedenceOperator(t *testing.T) {
 		},
 		{
 			"(1 + 2) * 3;", "((1 + 2) * 3)",
+		},
+		{
+			"1-- + 2++;", "((1--) + (2++))",
+		},
+		{
+			"(1-- + 2 * 3) + 2++;", "(((1--) + (2 * 3)) + (2++))",
 		},
 	}
 

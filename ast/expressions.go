@@ -71,5 +71,22 @@ func (ie *InfixExpression) expressionNode() {
 }
 
 func (ie *InfixExpression) String() string {
-	return "(" + ie.Left.String() + " "+ ie.TokenLiteral() + " " +  ie.Right.String() + ")"
+	return "(" + ie.Left.String() + " " + ie.TokenLiteral() + " " + ie.Right.String() + ")"
+}
+
+type SuffixExpression struct {
+	Token token.Token
+	Left  Expression
+}
+
+func (p *SuffixExpression) TokenLiteral() string {
+	return p.Token.Literal
+}
+
+func (p *SuffixExpression) expressionNode() {
+
+}
+
+func (ie *SuffixExpression) String() string {
+	return "(" + ie.Left.String() + ie.TokenLiteral() + ")"
 }

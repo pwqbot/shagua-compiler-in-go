@@ -6,10 +6,17 @@ import (
 	"strconv"
 )
 
+type (
+	prefixParseFn func() ast.Expression
+	infixParseFn  func(ast.Expression) ast.Expression
+	suffixParseFn func(ast.Expression) ast.Expression
+)
+
 type ExprParser struct {
 	*Parser
 	prefixParseFns map[token.TokenType]prefixParseFn
 	infixParseFns  map[token.TokenType]infixParseFn
+	suffixParseFns map[token.TokenType]suffixParseFn
 }
 
 func NewExprParser(parser *Parser) *ExprParser {
@@ -17,6 +24,7 @@ func NewExprParser(parser *Parser) *ExprParser {
 		Parser:         parser,
 		prefixParseFns: map[token.TokenType]prefixParseFn{},
 		infixParseFns:  map[token.TokenType]infixParseFn{},
+		suffixParseFns: map[token.TokenType]suffixParseFn{},
 	}
 
 	p.registerPrefix(token.IDENT, p.parseIndentifier)
@@ -29,6 +37,9 @@ func NewExprParser(parser *Parser) *ExprParser {
 	p.registerInfix(token.MINUS, p.parseInfixExpression)
 	p.registerInfix(token.DIVIDE, p.parseInfixExpression)
 	p.registerInfix(token.MULTI, p.parseInfixExpression)
+
+	p.registerSuffix(token.PLUSPLUS, p.parseSuffixExpression)
+	p.registerSuffix(token.MINUSMINUS, p.parseSuffixExpression)
 	return p
 }
 
@@ -40,6 +51,10 @@ func (p *ExprParser) registerInfix(t token.TokenType, f infixParseFn) {
 	p.infixParseFns[t] = f
 }
 
+func (p *ExprParser) registerSuffix(t token.TokenType, f suffixParseFn) {
+	p.suffixParseFns[t] = f
+}
+
 func (p *ExprParser) parseExpression(precedence int) ast.Expression {
 	// NOTE: check if we have a prefixFn associated with curToken
 	prefix := p.prefixParseFns[p.curToken.Type]
@@ -48,6 +63,13 @@ func (p *ExprParser) parseExpression(precedence int) ast.Expression {
 	}
 
 	leftExp := prefix()
+
+	suffix := p.suffixParseFns[p.peekToken.Type]
+	if suffix != nil {
+		println("find")
+		p.nextToken()
+		leftExp = suffix(leftExp)
+	}
 
 	for !p.peekTokenIs(token.SEMICOLON) &&
 		precedence < findPrecedence(p.peekToken.Type) {
@@ -87,6 +109,14 @@ func (p *ExprParser) parseInfixExpression(left ast.Expression) ast.Expression {
 	p.nextToken()
 	expr.Right = p.parseExpression(precedence)
 
+	return expr
+}
+
+func (p *ExprParser) parseSuffixExpression(left ast.Expression) ast.Expression {
+	expr := &ast.SuffixExpression{
+		Token: p.curToken,
+		Left:  left,
+	}
 	return expr
 }
 
