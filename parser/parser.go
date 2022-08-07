@@ -4,22 +4,72 @@ import (
 	"compiler/ast"
 	"compiler/lexer"
 	"compiler/token"
+	"fmt"
 )
 
+// take token from lexer, then parse to ast
 type Parser struct {
-	l *lexer.Lexer
+	l      *lexer.Lexer
+	errors []error
 
 	curToken  token.Token
 	peekToken token.Token
+
+	stmtParser *StmtParser
+	exprParser *ExprParser
 }
 
 func New(l *lexer.Lexer) *Parser {
 	p := &Parser{
-		l: l,
+		l:          l,
+		errors:     []error{},
+		curToken:   token.Token{},
+		peekToken:  token.Token{},
+		stmtParser: &StmtParser{},
+		exprParser: &ExprParser{},
 	}
+	p.stmtParser = &StmtParser{
+		Parser: p,
+	}
+	p.exprParser = NewExprParser(p)
+	p.nextToken()
+	p.nextToken()
+
 	return p
 }
 
+func (p *Parser) ParseProgram() *ast.Program {
+	program := &ast.Program{
+		Statements: make([]ast.Statement, 0),
+	}
+
+	for p.curToken.Type != token.EOF {
+		// progrom made up of statements
+		statement := p.parseStatement()
+		if statement != nil {
+			program.Statements = append(program.Statements, statement)
+		}
+		p.nextToken()
+	}
+	return program
+}
+
+func (p *Parser) parseStatement() ast.Statement {
+	switch p.curToken.Type {
+	case token.LET:
+		return p.stmtParser.parsetLetStatement()
+	// case token.IF:
+	// 	return p.stmtParser.parseIfStatement()
+	case token.RETURN:
+		return p.stmtParser.parseReturnStatement()
+	case token.FUNCTION:
+		return p.stmtParser.parseFunctionStatement()
+	default:
+		return p.stmtParser.parseExpressionStatement(LOWEST)
+	}
+}
+
+// some helper junctions
 func (p *Parser) nextToken() {
 	p.curToken = p.peekToken
 	p.peekToken = p.l.NextToken()
@@ -33,73 +83,23 @@ func (p *Parser) peekTokenIs(t token.TokenType) bool {
 	return p.peekToken.Type == t
 }
 
+// if next token is t, move to next, or add peek error
 func (p *Parser) expectPeek(t token.TokenType) bool {
 	if p.peekTokenIs(t) {
 		p.nextToken()
 		return true
 	} else {
+		p.addPeekError(t)
 		return false
 	}
 }
 
-func newProgramNode() *ast.Program {
-	return &ast.Program{
-		Statements: make([]ast.Statement, 0),
-	}
+// error handling
+func (p *Parser) Errors() []error {
+	return p.errors
 }
 
-func (p *Parser) ParseProgram() *ast.Program {
-	program := newProgramNode()
-
-	for p.curToken.Type != token.EOF {
-		statement := p.parseStatement()
-		if statement != nil {
-			program.Statements = append(program.Statements, statement)
-		}
-		p.nextToken()
-	}
-	return program
-}
-
-func (p *Parser) parseStatement() ast.Statement {
-	switch p.curToken.Type {
-	case token.LET:
-		return p.parsetLetStatement()
-	case token.IF:
-		return p.parseIfStatement()
-	case token.RETURN:
-		return p.parseReturnStatement()
-	}
-	return nil
-
-}
-
-func (p *Parser) parsetLetStatement() ast.Statement {
-	stmt := &ast.LetStatement{Token: p.curToken}
-
-	if !p.expectPeek(token.IDENT) {
-		return nil
-	}
-
-	stmt.Name = &ast.Identifier{
-		Token: p.curToken,
-		Value: p.curToken.Literal,
-	}
-
-	// do noting with assign
-	if !p.expectPeek(token.ASSIGN) {
-		return nil
-	}
-
-	return nil
-}
-
-func (p *Parser) parseReturnStatement() ast.Statement {
-
-	return nil
-}
-
-func (p *Parser) parseIfStatement() ast.Statement {
-	return nil
-
+func (p *Parser) addPeekError(t token.TokenType) {
+	err := fmt.Errorf("Expect %v, got %v", t, p.peekToken.Type)
+	p.errors = append(p.errors, err)
 }
