@@ -39,6 +39,37 @@ func TestParseIntegerExpression(t *testing.T) {
 	}
 }
 
+func TestIfExpreesion(t *testing.T) {
+	table := []struct {
+		input string
+		expect string
+	}{
+		{
+			"if (x < y) { x }", "if ((x < y)){x}",
+		},
+		{
+			"if (x < y) { x } else { y }","if ((x < y)){x}{y}",
+		},
+	}
+
+	for _, data := range table {
+		// println(data)
+		l := lexer.New(data.input)
+		p := New(l)
+		program := p.ParseProgram()
+		require.Equal(t, []error{}, p.Errors())
+		require.Equal(t, 1, len(program.Statements))
+
+		expr, ok := (program.Statements[0]).(*ast.ExpressionStatement)
+		require.True(t, ok)
+
+		intLiteral, ok := expr.Expression.(*ast.IfExpreesion)
+		require.True(t, ok)
+
+		assert.Equal(t, data.expect, intLiteral.String())
+	}
+}
+
 func TestParsePrefixExpression(t *testing.T) {
 	table := []struct {
 		input string
@@ -170,6 +201,27 @@ func TestPrecedenceOperator(t *testing.T) {
 		{
 			"1-- + 2++;", "((1--) + (2++))",
 		},
+		{
+			"1 + 2 < 3;", "((1 + 2) < 3)",
+		},
+		{
+			"1 + 2 <= 3;", "((1 + 2) <= 3)",
+		},
+		{
+			"1 + 2 >= 3;", "((1 + 2) >= 3)",
+		},
+		{
+			"1 + 2 > 3;", "((1 + 2) > 3)",
+		},
+		{
+			"1 + (2 > 3);", "(1 + (2 > 3))",
+		},
+		{
+			"5 > 4 == 3 < 4;", "((5 > 4) == (3 < 4))",
+		},
+		// {
+		// 	"1 +-+ 2;", "",
+		// },
 		{
 			"(1-- + 2 * 3) + 2++;", "(((1--) + (2 * 3)) + (2++))",
 		},

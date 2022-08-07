@@ -12,18 +12,13 @@ type StmtParser struct {
 func (p *StmtParser) parseExpressionStatement(precedence int) ast.Statement {
 	stmt := &ast.ExpressionStatement{
 		Token:      p.curToken,
-		Expression: p.exprParser.parseExpression(LOWEST),
+		Expression: p.exprParser.ParseExpreesion(LOWEST),
 	}
 
-	// println(p.curToken.Literal)
-	// println(stmt.Expression.TokenLiteral())
 	if p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
 
-	// println(p.curToken.Literal)
-
-	// print(stmt.Expression.TokenLiteral())
 	return stmt
 }
 
@@ -52,7 +47,7 @@ func (p *StmtParser) parsetLetStatement() ast.Statement {
 	}
 
 	// TODO(dingwang): parse expression
-	stmt.Value = p.exprParser.parseExpression(LOWEST)
+	stmt.Value = p.exprParser.ParseExpreesion(LOWEST)
 
 	for !p.curTokenIs(token.SEMICOLON) {
 		p.nextToken()
@@ -81,4 +76,23 @@ func (p *StmtParser) parseIfStatement() ast.Statement {
 
 func (p *StmtParser) parseFunctionStatement() ast.Statement {
 	return nil
+}
+
+func (p *StmtParser) parseBlockStatement() *ast.BlockStatement {
+	b := &ast.BlockStatement{
+		Token:      p.curToken,
+		Statements: []ast.Statement{},
+	}
+
+	p.nextToken()
+
+	for !p.curTokenIs(token.RBRACE) && !p.curTokenIs(token.EOF) {
+		stmt := p.parseStatement()
+		if b != nil {
+			b.Statements = append(b.Statements, stmt)
+		}
+		p.nextToken()
+	}
+
+	return b
 }

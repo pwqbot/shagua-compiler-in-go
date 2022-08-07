@@ -8,6 +8,7 @@ type Node interface {
 type Statement interface {
 	Node
 	statementNode()
+	String() string
 }
 
 type Expression interface {
