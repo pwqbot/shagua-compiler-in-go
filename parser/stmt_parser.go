@@ -88,7 +88,7 @@ func (p *StmtParser) parseBlockStatement() *ast.BlockStatement {
 
 	for !p.curTokenIs(token.RBRACE) && !p.curTokenIs(token.EOF) {
 		stmt := p.parseStatement()
-		if b != nil {
+		if stmt != nil {
 			b.Statements = append(b.Statements, stmt)
 		}
 		p.nextToken()

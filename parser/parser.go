@@ -100,6 +100,6 @@ func (p *Parser) Errors() []error {
 }
 
 func (p *Parser) addPeekError(t token.TokenType) {
-	err := fmt.Errorf("Expect %v, got %v", t, p.peekToken.Type)
+	err := fmt.Errorf("expect %v, got %v", t, p.peekToken.Type)
 	p.errors = append(p.errors, err)
 }
