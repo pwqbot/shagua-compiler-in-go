@@ -99,16 +99,16 @@ type Boolean struct {
 	Value bool
 }
 
-func (p *Boolean) TokenLiteral() string {
-	return p.Token.Literal
+func (b *Boolean) TokenLiteral() string {
+	return b.Token.Literal
 }
 
-func (p *Boolean) expressionNode() {
+func (b *Boolean) expressionNode() {
 
 }
 
-func (ie *Boolean) String() string {
-	return "(" + ie.TokenLiteral() + ")"
+func (b *Boolean) String() string {
+	return "(" + b.TokenLiteral() + ")"
 }
 
 type IfExpreesion struct {
@@ -129,12 +129,13 @@ func (expr *IfExpreesion) expressionNode() {
 func (expr *IfExpreesion) String() string {
 	s := "if"
 	s += " (" + expr.Condition.String() + ")"
-	s += expr.Consequence.String() 
+	s += expr.Consequence.String()
 	if expr.Alternatvie != nil {
 		s += expr.Alternatvie.String()
 	}
 	return s
 }
+
 type FnExpression struct {
 	Token token.Token
 	Param []Identifier

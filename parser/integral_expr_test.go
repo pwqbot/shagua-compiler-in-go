@@ -39,6 +39,36 @@ func TestParseIntegerExpression(t *testing.T) {
 	}
 }
 
+func TestParseBooleanExpression(t *testing.T) {
+	table := []struct {
+		input string
+		value bool
+	}{
+		{
+			"true;", true,
+		},
+		{
+			"false", false,
+		},
+	}
+
+	for _, data := range table {
+		// println(data)
+		l := lexer.New(data.input)
+		p := New(l)
+		program := p.ParseProgram()
+		require.Equal(t, 1, len(program.Statements))
+
+		expr, ok := (program.Statements[0]).(*ast.ExpressionStatement)
+		require.True(t, ok)
+
+		intLiteral, ok := expr.Expression.(*ast.Boolean)
+		require.True(t, ok)
+
+		assert.Equal(t, data.value, intLiteral.Value)
+	}
+}
+
 func TestIfExpreesion(t *testing.T) {
 	table := []struct {
 		input string
