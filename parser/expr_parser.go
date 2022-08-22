@@ -4,6 +4,8 @@ import (
 	"compiler/ast"
 	"compiler/token"
 	"strconv"
+
+	"github.com/golang/glog"
 )
 
 type (
@@ -33,6 +35,8 @@ func NewExprParser(parser *Parser) *ExprParser {
 	p.registerPrefix(token.BANG, p.parsePrefixExpression)
 	p.registerPrefix(token.MINUS, p.parsePrefixExpression)
 	p.registerPrefix(token.LPAREN, p.parseParem)
+	p.registerPrefix(token.TRUE, p.parseBoolean)
+	p.registerPrefix(token.FALSE, p.parseBoolean)
 
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
 	p.registerInfix(token.MINUS, p.parseInfixExpression)
@@ -71,6 +75,7 @@ func (p *ExprParser) ParseExpreesion(precedence int) ast.Expression {
 		leftExp = infix(leftExp)
 	}
 
+	glog.Error(leftExp.TokenLiteral())
 	return leftExp
 }
 
@@ -146,6 +151,13 @@ func (p *ExprParser) parseInteger() ast.Expression {
 	}
 }
 
+func (p *ExprParser) parseBoolean() ast.Expression {
+	return &ast.Boolean{
+		Token: p.curToken,
+		Value: p.curTokenIs(token.TRUE),
+	}
+}
+
 func (p *ExprParser) parseIfExpression() ast.Expression {
 	expr := &ast.IfExpreesion{
 		Token:       p.curToken,
@@ -166,7 +178,6 @@ func (p *ExprParser) parseIfExpression() ast.Expression {
 		p.expectPeek(token.LBRACE)
 		expr.Alternatvie = p.stmtParser.parseBlockStatement()
 	}
-	
 
 	return expr
 }
