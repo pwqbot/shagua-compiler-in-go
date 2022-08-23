@@ -5,7 +5,6 @@ import (
 	"compiler/token"
 	"strconv"
 
-	"github.com/golang/glog"
 )
 
 type (
@@ -62,6 +61,7 @@ func (p *ExprParser) ParseExpreesion(precedence int) ast.Expression {
 		return nil
 	}
 
+	
 	leftExp := prefix()
 
 	for !p.peekTokenIs(token.SEMICOLON) &&
@@ -75,7 +75,6 @@ func (p *ExprParser) ParseExpreesion(precedence int) ast.Expression {
 		leftExp = infix(leftExp)
 	}
 
-	glog.Error(leftExp.TokenLiteral())
 	return leftExp
 }
 
@@ -93,8 +92,8 @@ func (p *ExprParser) parsePrefixExpression() ast.Expression {
 		Right: nil,
 	}
 
-	p.nextToken()
 	precedence := findPrecedence(p.curToken.Type)
+	p.nextToken()
 	expr.Right = p.ParseExpreesion(precedence)
 
 	return expr

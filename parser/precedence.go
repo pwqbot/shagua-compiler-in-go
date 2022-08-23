@@ -1,6 +1,8 @@
 package parser
 
-import "compiler/token"
+import (
+	"compiler/token"
+)
 
 const (
 	_ int = iota

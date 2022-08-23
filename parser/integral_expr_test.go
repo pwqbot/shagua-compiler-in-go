@@ -71,14 +71,14 @@ func TestParseBooleanExpression(t *testing.T) {
 
 func TestIfExpreesion(t *testing.T) {
 	table := []struct {
-		input string
+		input  string
 		expect string
 	}{
 		{
 			"if (x < y) { x }", "if ((x < y)){x}",
 		},
 		{
-			"if (x < y) { x } else { y }","if ((x < y)){x}{y}",
+			"if (x < y) { x } else { y }", "if ((x < y)){x}{y}",
 		},
 	}
 
@@ -185,7 +185,6 @@ func TestParseInfixExpression(t *testing.T) {
 	}
 
 	for _, data := range table {
-		// println(data)
 		l := lexer.New(data.input)
 		p := New(l)
 		program := p.ParseProgram()
@@ -195,12 +194,12 @@ func TestParseInfixExpression(t *testing.T) {
 		assert.True(t, ok)
 
 		infixExpression, ok := expr.Expression.(*ast.InfixExpression)
-		assert.True(t, ok)
+		assert.True(t, ok, expr.Expression.String())
 
 		LIntLiteral, ok := infixExpression.Left.(*ast.IntegerLiteral)
-		assert.True(t, ok)
+		assert.True(t, ok, infixExpression.Left.String())
 		RIntLiteral, ok := infixExpression.Right.(*ast.IntegerLiteral)
-		assert.True(t, ok)
+		assert.True(t, ok, infixExpression.Right.String())
 
 		assert.Equal(t, int64(data.lvalue), LIntLiteral.Value)
 		assert.Equal(t, int64(data.rvalue), RIntLiteral.Value)
@@ -254,6 +253,9 @@ func TestPrecedenceOperator(t *testing.T) {
 		// },
 		{
 			"(1-- + 2 * 3) + 2++;", "(((1--) + (2 * 3)) + (2++))",
+		},
+		{
+			"-5 + 5", "((-5) + 5)",
 		},
 	}
 
