@@ -10,6 +10,15 @@ const (
 	NULL_OBJ    = "NULL"
 )
 
+type Object interface {
+	Type() ObjectType
+	Inspect() string
+}
+
+type Environment struct {
+	store map[string]Object
+}
+
 type Integer struct {
 	Value int64
 }
@@ -34,8 +43,17 @@ func (i *Boolean) Inspect() string {
 	return fmt.Sprintf("%v", i.Value)
 }
 
+var (
+	NULL = &Null{}
+	TRUE = &Boolean{
+		Value: true,
+	}
+	FALSE = &Boolean{
+		Value: false,
+	}
+)
+
 type Null struct {
-	Value bool
 }
 
 func (i *Null) Type() ObjectType {
@@ -44,13 +62,4 @@ func (i *Null) Type() ObjectType {
 
 func (i *Null) Inspect() string {
 	return "NULL"
-}
-
-type Object interface {
-	Type() ObjectType
-	Inspect() string
-}
-
-type Environment struct {
-	store map[string]Object
 }
