@@ -32,7 +32,6 @@ func (p *StmtParser) parsetLetStatement() ast.Statement {
 
 	print(p.peekToken.Literal)
 	if !p.expectPeek(token.IDENT) {
-		p.addPeekError(p.peekToken.Type)
 		return nil
 	}
 
@@ -46,7 +45,6 @@ func (p *StmtParser) parsetLetStatement() ast.Statement {
 		return nil
 	}
 
-	// TODO(dingwang): parse expression
 	stmt.Value = p.exprParser.ParseExpreesion(LOWEST)
 
 	for !p.curTokenIs(token.SEMICOLON) {
@@ -63,19 +61,12 @@ func (p *StmtParser) parseReturnStatement() ast.Statement {
 		Value: nil,
 	}
 	p.nextToken()
-	// TODO(dingwang): parse expression
+
+	stmt.Value = p.exprParser.ParseExpreesion(LOWEST)
 	for !p.curTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
 	return stmt
-}
-
-func (p *StmtParser) parseIfStatement() ast.Statement {
-	return nil
-}
-
-func (p *StmtParser) parseFunctionStatement() ast.Statement {
-	return nil
 }
 
 func (p *StmtParser) parseBlockStatement() *ast.BlockStatement {
@@ -88,7 +79,7 @@ func (p *StmtParser) parseBlockStatement() *ast.BlockStatement {
 
 	for !p.curTokenIs(token.RBRACE) && !p.curTokenIs(token.EOF) {
 		stmt := p.parseStatement()
-		if b != nil {
+		if stmt != nil {
 			b.Statements = append(b.Statements, stmt)
 		}
 		p.nextToken()

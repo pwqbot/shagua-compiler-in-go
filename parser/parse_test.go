@@ -42,3 +42,37 @@ func testLetStatement(t *testing.T, s ast.Statement, name string) {
 	assert.True(t, ok)
 	assert.Equal(t, name, letStmt.Name.TokenLiteral())
 }
+
+func TestReturnStatements(t *testing.T) {
+	input := `return x - 5;
+    return 5;
+    return x;
+    `
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+
+	require.Equal(t, 3, len(program.Statements))
+
+	tests := []struct {
+		expectedIdentifier string
+	}{
+		{"(x - 5)"},
+		{"5"},
+		{"x"},
+	}
+
+	for i, tt := range tests {
+		stmt := program.Statements[i]
+		testReturnStatement(t, stmt, tt.expectedIdentifier)
+	}
+}
+
+func testReturnStatement(t *testing.T, s ast.Statement, name string) {
+	assert.Equal(t, "return", s.TokenLiteral())
+
+	letStmt, ok := s.(*ast.ReturnStatement)
+	assert.True(t, ok)
+	assert.Equal(t, name, letStmt.Value.String())
+}
